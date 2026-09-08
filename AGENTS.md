@@ -12,6 +12,13 @@ Klipper 远程显示屏：ESP32 固件（ESP-IDF 5.5.5）+ Windows 桌面端（M
 - IDF 源码在 `C:/esp/v5.5.5/esp-idf`。GitHub 走代理 `curl --proxy http://127.0.0.1:8635`。
 - 系统有 pio（`C:\Users\m9291\.platformio\penv\Scripts\pio.exe`）；`tmp/pio_music` 是厂商 demo 的 PIO 对照工程，增量编译+上传约 25 秒，做显示实验比 IDF 全量快得多。
 
+## 发版约定
+
+- 版本号维护在 `src/core/version.h`（`KR_VERSION`，设置页和 Moonraker identify 都用它）；发版 = 改它 + 打同名 `vX.Y.Z` tag 推送。
+- CI  release 资产名**不带版本号**（`klipper-remote-esp32-<board>.zip`），文档站下载直链走 `releases/latest/download/...`；tag 含 `wip` 标为预发布。
+- CI 会强推移动标签 `latest` 到最新正式版提交。
+- `src/ui/CMakeLists.txt` 是 GLOB 收集源文件：新增面板/字体文件后若链接报 undefined，先 touch 它触发 CMake 重配（不能加 CONFIGURE_DEPENDS，IDF script 模式会报错）。
+
 ## 串口 CLI（JC8048 / esp32 端）
 
 `help|scan|wifi|wifioff|wifion|mr|mrstart|status|ps|printer|gc|ls|cd|pwd|cat|rm`，实现在 `src/ports/esp32/entry/debug_cli.c`。
@@ -68,6 +75,14 @@ Klipper 远程显示屏：ESP32 固件（ESP-IDF 5.5.5）+ Windows 桌面端（M
 - 自研驱动：`src/bsp/esp32/rgb44.c` / `rgb44.h`（4.4 传输模型 + 双 fb vsync 换页 + swap 信号量；实验原型在 `tmp/lvtest/main/`）
 - IDF RGB 驱动：`C:/esp/v5.5.5/esp-idf/components/esp_lcd/rgb/esp_lcd_panel_rgb.c`
 - 厂商 demo：`tmp/pio_music/src/lvgl_music_gt911_5.0.ino`（LVGL 缓冲 2×800×480/8 像素内部 RAM）
+
+### 第二轮排障备忘（全表字库引入的滑动抽动，已解决）
+
+换 GB2312 全表字库后滑动抽动复发：根因是 5.4MB 字形表在 flash 走 XIP cache 读，
+表大 cache 局部性差，文本渲染的 flash 突发在 MSPI 上与 EDMA 扫描争抢 → 帧中
+EDMA 饥饿（所有计数器都看不见）。修复：JC8048 链 `_min` 最小子集字体
+（`ui_layout.c` 的 `UI_FONT_MIN` 开关），抽动消失。全程细节见 docs 指南第 12 节。
+JC8048 当前配置：DIRECT 双缓冲 + -O2 + refr15 + cache line 32B + UI_FONT_MIN=1。
 
 ### 排障原则（用户明确要求）
 

@@ -3,16 +3,27 @@
 | 板型 | 构建目标 | 屏幕 | 触摸 | 主控 / Flash | 状态 |
 |---|---|---|---|---|---|
 | [CYD 2432S028R](#cyd-2432s028r) | `cyd_2432s028r` | 2.8" 240×320 ILI9341 SPI | XPT2046 电阻 | ESP32 / 4MB | ✅ 稳定 |
-| [E32R35T](#e32r35t) | `e32r35t` | 3.5" 320×480 ST7796U SPI | XPT2046 电阻 | ESP32-32E / 4MB | 🚧 WIP |
-| [JC8048W550](#jc8048w550) | `jc8048w550` | 5" 800×480 ST7262 RGB 并口 | GT911 电容 | ESP32-S3 / 16MB | 🚧 WIP |
+| [E32R35T](#e32r35t) | `e32r35t` | 3.5" 320×480 ST7796U SPI | XPT2046 电阻 | ESP32-32E / 4MB | ✅ 稳定 |
+| [JC8048W550](#jc8048w550) | `jc8048w550` | 5" 800×480 ST7262 RGB 并口 | GT911 电容 | ESP32-S3 / 16MB | ✅ 稳定 |
 
-刷机包命名：`klipper-remote-esp32-<board>[-WIP]-<版本>.zip`。WIP 板型未经充分验证，遇到问题请到 [Issues](https://github.com/umeiko/KlipperScreen-esp/issues) 反馈。
+刷机包命名：`klipper-remote-esp32-<board>.zip`（资产名不带版本号，下面的直链永远指向最新正式版）。遇到问题请到 [Issues](https://github.com/umeiko/KlipperScreen-esp/issues) 反馈。
+
+| 板型 | 刷机包直链（最新正式版） |
+|---|---|
+| CYD 2432S028R | [klipper-remote-esp32-cyd_2432s028r.zip](https://github.com/umeiko/KlipperScreen-esp/releases/latest/download/klipper-remote-esp32-cyd_2432s028r.zip) |
+| E32R35T | [klipper-remote-esp32-e32r35t.zip](https://github.com/umeiko/KlipperScreen-esp/releases/latest/download/klipper-remote-esp32-e32r35t.zip) |
+| JC8048W550 | [klipper-remote-esp32-jc8048w550.zip](https://github.com/umeiko/KlipperScreen-esp/releases/latest/download/klipper-remote-esp32-jc8048w550.zip) |
+| Windows 桌面模拟器 | [klipper-remote-desktop-win-x86_64.zip](https://github.com/umeiko/KlipperScreen-esp/releases/latest/download/klipper-remote-desktop-win-x86_64.zip) |
 
 ---
 
 ## CYD 2432S028R
 
-"Cheap Yellow Display"（黄色 PCB 的 2.8" 开发板），本项目的参考板型。逻辑分辨率 **320×240 横屏**。
+![CYD 2432S028R](screenshots/boards/cyd_2432s028r.jpg)
+
+*"Cheap Yellow Display"（黄色 PCB 的 2.8" 开发板），本项目的参考板型。* 图：[Random Nerd Tutorials](https://randomnerdtutorials.com/cheap-yellow-display-esp32-2432s028r/)
+
+逻辑分辨率 **320×240 横屏**。
 
 - 主控：ESP32（双核 240MHz，520KB SRAM），4MB QIO Flash
 - 显示：ILI9341，SPI2 @ 40MHz，DMA 双缓冲（2 × 40 行）
@@ -29,11 +40,15 @@
 
 ## E32R35T
 
-ESP32-32E 3.5" 显示模组（[lcdwiki 资料页](https://www.lcdwiki.com/zh/3.5inch_ESP32-32E_Display)，触摸版 SKU：E32R35T）。逻辑分辨率 **480×320 横屏**。
+![E32R35T](screenshots/boards/e32r35t.png)
+
+*ESP32-32E 3.5" 显示模组（[lcdwiki 资料页](https://www.lcdwiki.com/zh/3.5inch_ESP32-32E_Display)，触摸版 SKU：E32R35T）。* 图：lcdwiki
+
+逻辑分辨率 **480×320 横屏**。
 
 - 主控：ESP32-WROOM-32E（双核 240MHz），4MB QIO Flash
 - 显示：ST7796U，SPI2 @ 40MHz；**与触摸屏共用 SPI 总线**（厂商设计）；无独立 RST（与 ESP32 EN 共用，驱动走软件复位）
-- 触摸：XPT2046 电阻屏，共用 SPI2；**首次启动会进入两点触摸校准**（无出厂校准值）
+- 触摸：XPT2046 电阻屏，共用 SPI2；出厂触摸校准已内置（提取自真机，免校准；个体差异可用串口 CLI `caltouch` 重校）
 - 背光：GPIO27，高电平点亮
 
 | 功能 | GPIO | 备注 |
@@ -51,7 +66,11 @@ ESP32-32E 3.5" 显示模组（[lcdwiki 资料页](https://www.lcdwiki.com/zh/3.5
 
 ## JC8048W550
 
-Guition 5" 电容屏模组（ESP32-S3）。逻辑分辨率 **800×480**。**WIP 适配中**，RGB 并口屏的撕裂/抽动排障全过程见[开发笔记](jc8048w550-rgb-display-guide.md)。
+![JC8048W550](screenshots/boards/jc8048w550.png)
+
+*Guition 5" 电容屏模组（ESP32-S3）。* 图：[openHASP 硬件页](https://www.openhasp.com/0.7.0/hardware/guition/jc8048w550/)
+
+逻辑分辨率 **800×480**。RGB 并口屏的撕裂/抽动排障全过程见[开发笔记](jc8048w550-rgb-display-guide.md)。
 
 - 主控：ESP32-S3，16MB Flash + PSRAM（双帧缓冲 2×768KB 放在 PSRAM）
 - 显示：ST7262 RGB 并口（RGB565），PCLK **必须 16MHz**；自研 rgb44 驱动（IDF 4.4 传输模型 + vsync 换页）

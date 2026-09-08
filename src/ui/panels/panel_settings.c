@@ -1,12 +1,13 @@
 /*
- * 设置：网络 / Moonraker / 语言 / 背光 / 自动息屏 + 主题/版本
- * 7 行超出 240 屏高，整页可上下滚动。
+ * 设置：网络 / Moonraker / 语言 / 显示设置 + 版本
+ * 背光、自动息屏、主题、反色、旋转收进"显示设置"二级菜单（panel_display）。
  */
 #include "../theme.h"
 #include "../lang.h"
 #include "../panel_mgr.h"
 #include "../assets/icons.h"
 #include "app_settings.h"
+#include "version.h"
 #include "bsp.h"
 #include <stdio.h>
 
@@ -22,10 +23,10 @@ static void open_moonraker(lv_event_t *e)
     panel_mgr_open("moonraker");
 }
 
-static void open_brightness(lv_event_t *e)
+static void open_display(lv_event_t *e)
 {
     LV_UNUSED(e);
-    panel_mgr_open("brightness");
+    panel_mgr_open("display");
 }
 
 /* 语言：下拉选择；切换后存 klipperscreen.conf，背光 1s 渐暗到黑再重启
@@ -43,6 +44,7 @@ static void on_lang_select(lv_event_t *e)
     bsp_restart();
 }
 
+<<<<<<< HEAD
 /* 息屏选项（秒）；0 = 永不 */
 static const uint32_t so_values[] = { 15, 30, 60, 300, 900, 1800, 3600, 0 };
 static const char    *so_labels[] = { "15秒", "30秒", "1分钟", "5分钟", "15分钟", "30分钟", "1小时", "永不" };
@@ -119,14 +121,21 @@ static lv_obj_t *make_link_row(lv_obj_t *scr, const char *key, const char *val, 
     return row;
 }
 
+=======
+>>>>>>> b18abf95e63d1f900eb014f6b04d9266ee981a43
 static lv_obj_t *create(void)
 {
     lv_obj_t *scr = lv_obj_create(NULL);
     lv_obj_set_style_bg_color(scr, theme_col(THEME_COL_BG), 0);
-    lv_obj_set_scroll_dir(scr, LV_DIR_VER);   /* 7 行超出 240 高，允许上下滚动 */
+    lv_obj_set_scroll_dir(scr, LV_DIR_VER);
 
-    make_link_row(scr, "无线网络", "", THEME_TITLEBAR_H + ui_px(4), open_wifi);
-    make_link_row(scr, "Moonraker 连接", "", THEME_TITLEBAR_H + ui_px(43), open_moonraker);
+    int y = THEME_TITLEBAR_H + ui_px(4);
+    const int step = ui_px(39);
+
+    theme_row_link(scr, "无线网络", "", y, open_wifi);
+    y += step;
+    theme_row_link(scr, "Moonraker 连接", "", y, open_moonraker);
+    y += step;
 
     /* 语言：下拉选项按注册表动态生成（各语言母语名），切换后渐暗重启生效 */
     static char lang_opts[128];
@@ -134,14 +143,14 @@ static lv_obj_t *create(void)
     for (unsigned i = 0; i < ui_lang_count(); i++)
         lo_len += snprintf(lang_opts + lo_len, sizeof(lang_opts) - lo_len, "%s%s",
                            i ? "\n" : "", ui_lang_name((ui_lang_t)i));
-    make_dropdown_row(scr, "语言", lang_opts, THEME_TITLEBAR_H + ui_px(82),
-                      (int)ui_lang_get(), on_lang_select, ui_icon(&img_globe_16, &img_globe_32));
+    theme_row_dropdown(scr, "语言", lang_opts, y,
+                       (int)ui_lang_get(), on_lang_select, ui_icon(&img_globe_16, &img_globe_32));
+    y += step;
 
-    /* 背光：行内显示当前亮度，点击进滑杆调节 */
-    char br[8];
-    snprintf(br, sizeof(br), "%d%%", settings_load_brightness());
-    make_link_row(scr, "背光", br, THEME_TITLEBAR_H + ui_px(121), open_brightness);
+    theme_row_link(scr, "显示设置", "", y, open_display);
+    y += step;
 
+<<<<<<< HEAD
     /* 自动息屏：下拉选择超时（立即生效） */
     static char so_opts[96];   /* 按当前语言拼接选项 */
     int so_len = 0, so_sel = (int)SO_COUNT - 1;
@@ -153,6 +162,9 @@ static lv_obj_t *create(void)
     }
     make_dropdown_row(scr, "自动息屏", so_opts, THEME_TITLEBAR_H + ui_px(160), so_sel,
                       on_screen_off_select, NULL);
+=======
+    theme_row(scr, "版本", KR_VERSION, y);
+>>>>>>> b18abf95e63d1f900eb014f6b04d9266ee981a43
 
     return scr;
 }

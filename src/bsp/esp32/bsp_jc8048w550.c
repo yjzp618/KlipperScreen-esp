@@ -87,6 +87,13 @@ void bsp_delay_ms(uint32_t ms)
     vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
+/* 反色 / 180° 旋转：RGB 并口屏（ST7262）无命令接口，硬件不支持；
+   DIRECT 双缓冲下软件翻转/反色的 CPU 拷贝会重新挤爆 MSPI 总线（抽动教训），不做 */
+bool bsp_disp_can_invert(void)    { return false; }
+bool bsp_disp_can_rotate180(void) { return false; }
+void bsp_disp_set_invert(bool en)    { LV_UNUSED(en); }
+void bsp_disp_set_rotate180(bool en) { LV_UNUSED(en); }
+
 /* 背光亮度：滑杆 0-100，经 bsp_set_brightness 分段映射到占空比 */
 static uint8_t bl_duty = 255;
 static int     bl_pct = 100;
@@ -347,7 +354,9 @@ void bsp_init(void)
     lv_tick_set_cb(tick_cb);
 
     lv_display_t *disp = lv_display_create(LCD_H_RES, LCD_V_RES);
-    /* DIRECT 双缓冲：LVGL 直渲两块 PSRAM 全帧 fb，flush 只换页不拷贝 */
+    /* DIRECT 双缓冲：LVGL 直渲两块 PSRAM 全帧 fb，flush 只换页不拷贝。
+       （试过 FULL 模式：省了 refr_sync_areas 同步拷贝 88→69ms/帧，
+       但静止时 1Hz 时钟也触发整帧渲染+回写爆发，每秒可见自抽，回退） */
     lv_display_set_buffers(disp, fb0, fb1, LCD_H_RES * LCD_V_RES * 2,
                            LV_DISPLAY_RENDER_MODE_DIRECT);
     lv_display_set_flush_cb(disp, flush_cb);
