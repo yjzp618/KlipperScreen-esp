@@ -10,20 +10,6 @@
 #include "bsp.h"
 #include <stdio.h>
 
-static lv_obj_t *make_row(lv_obj_t *parent, const char *key, const char *val, int y)
-{
-    lv_obj_t *row = theme_card(parent);
-    lv_obj_set_size(row, ui_content_w(), ui_px(38));
-    lv_obj_align(row, LV_ALIGN_TOP_MID, 0, y);
-
-    lv_obj_t *k = theme_label(row, key, THEME_FONT_M, THEME_COL_TEXT);
-    lv_obj_align(k, LV_ALIGN_LEFT_MID, ui_px(2), 0);
-
-    lv_obj_t *v = theme_label(row, val, THEME_FONT_S, THEME_COL_TEXT_DIM);
-    lv_obj_align(v, LV_ALIGN_RIGHT_MID, -ui_px(4), 0);
-    return row;
-}
-
 static void open_wifi(lv_event_t *e)
 {
     LV_UNUSED(e);
@@ -118,7 +104,7 @@ static lv_obj_t *make_link_row(lv_obj_t *scr, const char *key, const char *val, 
     lv_obj_t *row = theme_card(scr);
     lv_obj_set_size(row, ui_content_w(), ui_px(38));
     lv_obj_align(row, LV_ALIGN_TOP_MID, 0, y);
-    lv_obj_add_flag(row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_flag(row, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_USER_1);
     lv_obj_add_event_cb(row, cb, LV_EVENT_CLICKED, NULL);
 
     lv_obj_t *k = theme_label(row, key, THEME_FONT_M, THEME_COL_TEXT);
@@ -167,9 +153,6 @@ static lv_obj_t *create(void)
     }
     make_dropdown_row(scr, "自动息屏", so_opts, THEME_TITLEBAR_H + ui_px(160), so_sel,
                       on_screen_off_select, NULL);
-
-    make_row(scr, "主题", "Dark", THEME_TITLEBAR_H + ui_px(199));
-    make_row(scr, "版本", "0.1.0-dev", THEME_TITLEBAR_H + ui_px(238));
 
     return scr;
 }
